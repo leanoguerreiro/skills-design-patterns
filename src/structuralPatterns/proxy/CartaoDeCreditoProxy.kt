@@ -16,11 +16,6 @@ class CartaoDeCreditoProxy (
         conta.realizarPagamento(valor)
     }
 
-    fun depositar(valor: Double) {
-        println("C")
-        conta.depositar(valor)
-    }
-
     private fun verificarSaldo(valor: Double): Boolean {
         println("CARTÃO (PROXY): Verificando se o saldo de R$${conta.saldo} é suficiente...")
         return conta.saldo >= valor
