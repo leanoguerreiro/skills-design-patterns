@@ -2,7 +2,7 @@
 
 Este repositório contém implementações de exemplos práticos de Padrões de Projeto de Software (Design Patterns) utilizando a linguagem de programação Kotlin. O objetivo é demonstrar como cada padrão pode ser aplicado para resolver problemas comuns de design de software de forma elegante e eficiente.
 
-O projeto está organizado por categorias de padrões, começando com os **Padrões Criacionais**.
+O projeto está organizado por categorias de padrões, começando com os **Padrões Criacionais** e seguindo para os **Padrões Estruturais**.
 
 **Licença:** Este projeto está licenciado sob a [GNU General Public License v3.0](LICENSE).
 
@@ -207,6 +207,228 @@ O arquivo `FactoryTest01.kt` utiliza a fábrica para obter objetos de moeda sem 
     }
     ```
 ---
+
+### 2. Padrões Estruturais (Structural Patterns)
+
+Esses padrões se concentram em como classes e objetos podem ser compostos para formar estruturas maiores, mantendo essas estruturas flexíveis e eficientes.
+
+---
+
+#### **Adapter**
+
+O padrão Adapter permite que interfaces incompatíveis trabalhem juntas. Ele atua como uma ponte entre duas interfaces, convertendo a interface de uma classe na interface que o cliente espera.
+
+**Implementação:**
+
+Neste exemplo, temos uma interface `Pato` e uma interface `Peru`. Um `Peru` não pode ser usado onde um `Pato` é esperado. A classe `PeruAdapter` envolve um objeto `Peru` e implementa a interface `Pato`. Seus métodos `quack()` e `fly()` delegam as chamadas para os métodos correspondentes do `Peru` (`gooble()` e `fly()`), adaptando o comportamento.
+
+* `src/structuralPatterns/adapter/PeruAdapter.kt`
+
+    ```kotlin
+    package structuralPatterns.adapter
+
+    class PeruAdapter(private val peru: Peru) : Pato {
+        override fun quack() {
+            peru.gooble() // Adapta o grasnar para o som do peru
+        }
+
+        override fun fly() {
+            println("Simulando um voo longo: ")
+            (0..4).forEach { i ->
+                peru.fly() // Peru voa curtas distâncias, então simulamos um voo longo
+            }
+        }
+    }
+    ```
+
+**Exemplo de Uso:**
+
+O arquivo `AdapterTest01.kt` mostra uma função `testarPato` que só aceita objetos `Pato`. Graças ao `PeruAdapter`, podemos passar um peru adaptado para essa função.
+
+* `src/structuralPatterns/adapter/AdapterTest01.kt`
+
+    ```kotlin
+    fun main() {
+        val peruSelvagem = PeruSelvagem()
+        val peruAdapter: Pato = PeruAdapter(peruSelvagem)
+
+        println("----- Testando o Peru Adaptado para Pato -----")
+        testarPato(peruAdapter)
+    }
+
+    fun testarPato(pato: Pato) {
+        println("O 'pato' faz: ")
+        pato.quack()
+        pato.fly()
+    }
+    ```
+
+---
+
+#### **Decorator**
+
+O padrão Decorator anexa responsabilidades adicionais a um objeto dinamicamente. Os decoradores fornecem uma alternativa flexível à herança para estender a funcionalidade.
+
+**Implementação:**
+
+O projeto contém dois exemplos:
+1.  **Café:** Um `SimpleCoffee` pode ser "decorado" com `WithMilk` ou `WithWhippedCream`. Cada decorador adiciona seu próprio custo e descrição ao envolver o objeto de café original.
+2.  **Processador de Imagem:** Um `BasicImageProcessor` pode ser decorado com `ResizeImageProcessor` e `WatermarkedImageProcessor` para adicionar passos de processamento.
+
+* `src/structuralPatterns/decorator01/WithMilk.kt` (Decorador de Café)
+
+    ```kotlin
+    package structuralPatterns.decorator01
+
+    class WithMilk(decoratedCoffee: Coffee) : CoffeeDecorator(decoratedCoffee) {
+        override fun getCost(): Double {
+            return super.getCost() + 1.5
+        }
+        override fun getDescription(): String {
+            return super.getDescription() + ", com leite"
+        }
+    }
+    ```
+
+* `src/structuralPatterns/decorator02/WatermarkedImageProcessor.kt` (Decorador de Imagem)
+
+    ```kotlin
+    package structuralPatterns.decorator02
+
+    class WatermarkedImageProcessor (wrappedProcessor: ImageProcessor) : ImageProcessorDecorator(wrappedProcessor) {
+        override fun process(image: String): String {
+            val processedImage = super.process(image)
+            return "$processedImage + Marca D'ágia da Empresa"
+        }
+    }
+    ```
+
+**Exemplo de Uso:**
+
+Os arquivos de teste demonstram como envolver um objeto base com múltiplos decoradores para compor funcionalidades.
+
+* `src/structuralPatterns/decorator01/DecoratorTest01.kt`
+
+    ```kotlin
+    var myCoffee: Coffee = SimpleCoffee()
+    myCoffee = WithMilk(myCoffee)
+    myCoffee = WithWhippedCream(myCoffee)
+    println("Pedido: ${myCoffee.getDescription()} | Custo: R$ ${myCoffee.getCost()}")
+    // Saída: Pedido: Café simples, com leite, com chantilly | Custo: R$ 9.0
+    ```
+
+---
+
+#### **Facade**
+
+O padrão Facade fornece uma interface unificada e simplificada para um conjunto de interfaces em um subsistema. Ele esconde a complexidade do sistema e fornece uma interface de alto nível ao cliente.
+
+**Implementação:**
+
+A classe `ComputerFacade` simplifica a interação com os componentes complexos de um computador (`Cpu`, `Memory`, `HardDrive`). Em vez de o cliente ter que interagir com cada componente para ligar o computador, ele simplesmente chama o método `startComputer()` da facade.
+
+* `src/structuralPatterns/facade/ComputerFacade.kt`
+
+    ```kotlin
+    package structuralPatterns.facade
+
+    class ComputerFacade {
+        private val cpu = Cpu()
+        private val memory = Memory()
+        private val hardDrive = HardDrive()
+
+        fun startComputer() {
+            println(">>> Iniciando o computador (via Facade)...")
+            cpu.start()
+            val bootData = hardDrive.read(0L, 1024)
+            memory.load(0L, bootData)
+            cpu.execute()
+            println(">>> Computador pronto para uso!")
+        }
+
+        fun shutdownComputer() {
+            println(">>> Desligando o computador (via Facade)...")
+            cpu.stop()
+            memory.clear()
+            println(">>> Computador desligado.")
+        }
+    }
+    ```
+
+**Exemplo de Uso:**
+
+O arquivo `FacadeTest01.kt` mostra como o cliente interage com o sistema complexo de forma simples.
+
+* `src/structuralPatterns/facade/FacadeTest01.kt`
+
+    ```kotlin
+    package structuralPatterns.facade
+
+    fun main() {
+        val computer = ComputerFacade()
+        computer.startComputer()
+        println("... Usando o computador por algumas horas ...\n")
+        computer.shutdownComputer()
+    }
+    ```
+
+---
+
+#### **Proxy**
+
+O padrão Proxy fornece um substituto ou placeholder para outro objeto para controlar o acesso a ele. É usado para adicionar uma camada de indireção, que pode ser útil para logging, controle de acesso, lazy initialization, etc.
+
+**Implementação:**
+
+`CartaoDeCreditoProxy` atua como um proxy para a `ContaBancaria` real. Antes de executar um pagamento, o proxy realiza uma verificação de saldo. Somente se o saldo for suficiente, ele delega a operação de pagamento para o objeto `ContaBancaria`. Isso protege o objeto real de operações inválidas (tentar pagar sem saldo).
+
+* `src/structuralPatterns/proxy/CartaoDeCreditoProxy.kt`
+
+    ```kotlin
+    package structuralPatterns.proxy
+
+    class CartaoDeCreditoProxy (
+        private val conta: ContaBancaria
+    ) : Pagamento {
+        override fun realizarPagamento(valor: Double) {
+            println("CARTÃO (PROXY): Tentativa de pagamento de R$ $valor recebida.")
+
+            if (!verificarSaldo(valor)) {
+                println("CARTÃO (PROXY): Pagamento de R$$valor RECUSADO. Saldo insuficiente.")
+                return
+            }
+            println("CARTÃO (PROXY): Saldo suficiente. Transação autorizada.")
+            conta.realizarPagamento(valor)
+        }
+
+        private fun verificarSaldo(valor: Double): Boolean {
+            println("CARTÃO (PROXY): Verificando se o saldo de R$${conta.saldo} é suficiente...")
+            return conta.saldo >= valor
+        }
+    }
+    ```
+
+**Exemplo de Uso:**
+
+O cliente em `ProxyTest01.kt` interage com o proxy (`meuCartao`) como se fosse o objeto de pagamento real, sem saber da lógica de verificação de saldo que ele contém.
+
+* `src/structuralPatterns/proxy/ProxyTest01.kt`
+
+    ```kotlin
+    fun main() {
+        val minhaConta = ContaBancaria(500.0)
+        val meuCartao: Pagamento = CartaoDeCreditoProxy(minhaConta)
+
+        println("--- TENTATIVA 1: Compra de R$350.0 ---")
+        meuCartao.realizarPagamento(350.0) // Sucesso
+
+        println("--- TENTATIVA 2: Compra de R$200.0 ---")
+        meuCartao.realizarPagamento(200.0) // Falha, saldo insuficiente
+    }
+    ```
+
+---
+
 
 ## Como Executar os Testes
 
