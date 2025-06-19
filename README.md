@@ -13,19 +13,15 @@ O código-fonte está localizado no diretório `src` e segue a seguinte estrutur
 ```
 └── src/
     └── creationalPatterns/
-        ├── builder/
-        │   ├── BuilderTest01.kt
-        │   └── Person.kt
-        ├── factory/
-        │   ├── Country.kt
-        │   ├── Currency.kt
-        │   ├── CurrencyFactory.kt
-        │   ├── FactoryTest01.kt
-        │   ├── Real.kt
-        │   └── UsDollar.kt
-        └── singleton/
-            ├── AppConfig.kt
-            └── SingletonTest01.kt
+    │    ├── builder/
+    │    ├── factory/
+    │    └── singleton/
+    └── structuralPatterns/
+         ├── adapter/
+         ├── decorator01/
+         ├── decorator02/
+         ├── facade/
+         └── proxy/
 ```
 
 ## Padrões de Projeto Implementados
